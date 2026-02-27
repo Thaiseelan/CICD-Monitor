@@ -1,11 +1,23 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
 require("dotenv").config();
-const authMiddleware = require('./middleware/authMiddleWare');
+const express = require("express");
 const app = express();
-
 app.use(express.json());
+const cors = require("cors");
+app.use(cors());
+const mongoose = require("mongoose");
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
+const authMiddleware = require('./middleware/authMiddleWare');
+
+const webhookRoutes = require("./routes/webhook");
+app.use("/api/webhook", webhookRoutes);
+const logRoutes = require("./routes/log");
+app.use("/api/logs", logRoutes);
+const buildRoutes = require("./routes/build");
+app.use("/api/builds", buildRoutes);
+
+
 app.use('/api/projects', require('./routes/project'));
 
 app.use('/api/auth', require('./routes/auth'));
@@ -19,6 +31,9 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 app.get("/", (req, res) => {
   res.send("Intelligent CI/CD Monitor API running...");
 });
+const aiRoutes = require("./routes/ai");
+app.use("/api", aiRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 
