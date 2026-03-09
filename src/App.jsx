@@ -1,11 +1,64 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ProjectsPage from "./pages/ProjectsPage";
+import BuildsPage from "./pages/BuildsPage";
+import PipelinesPage from "./pages/PipelinesPage";
+import AiInsightsPage from "./pages/AiInsightsPage";
+
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem("token");
+  return token ? children : <Navigate to="/login" replace />;
+}
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/builds"
+          element={
+            <PrivateRoute>
+              <BuildsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <PrivateRoute>
+              <ProjectsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/pipelines"
+          element={
+            <PrivateRoute>
+              <PipelinesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ai-insights"
+          element={
+            <PrivateRoute>
+              <AiInsightsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );

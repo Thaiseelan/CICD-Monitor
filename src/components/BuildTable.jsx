@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import StatusBadge from "../components/StatusBadge";
 import {
   LineChart,
@@ -22,15 +21,11 @@ const thStyle = {
 };
 
 
-const BuildsTable = ({ builds }) => {
-  const [aiInsight, setAiInsight] = useState("");
-  const [aiLoading, setAiLoading] = useState(true);
-  const [aiError, setAiError]     = useState(false);
-
-  const total   = builds.length;
-  const success = builds.filter(b => b.status === "success").length;
-  const running = builds.filter(b => b.status === "running").length;
-  const failed  = builds.filter(b => b.status === "failed").length;
+const BuildsTable = ({ builds, metrics }) => {
+  const total   = metrics?.summary?.total   ?? builds.length;
+  const success = metrics?.summary?.success ?? builds.filter(b => b.status === "success").length;
+  const running = metrics?.summary?.running ?? builds.filter(b => b.status === "running").length;
+  const failed  = metrics?.summary?.failed  ?? builds.filter(b => b.status === "failed").length;
 
   const sortedBuilds = [...builds].sort(
     (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
@@ -45,12 +40,22 @@ const BuildsTable = ({ builds }) => {
     }),
     duration: b.duration || 0,
   }));
-const trend =
-  chartData.length > 1 &&
-  chartData[chartData.length - 1].duration <
-  chartData[0].duration
-    ? "Improving 📉"
-    : "Degrading 📈";
+  let trend = "Not enough data";
+  if (metrics?.trends) {
+    const { durationTrend, durationChangePct } = metrics.trends;
+    if (durationTrend === "increasing") {
+      trend = `Duration up ${(durationChangePct * 100).toFixed(1)}% ↑`;
+    } else if (durationTrend === "decreasing") {
+      trend = `Duration down ${(Math.abs(durationChangePct) * 100).toFixed(1)}% ↓`;
+    } else if (durationTrend === "flat") {
+      trend = "Duration stable (±10%)";
+    }
+  } else if (chartData.length > 1) {
+    trend =
+      chartData[chartData.length - 1].duration < chartData[0].duration
+        ? "Improving 📉"
+        : "Degrading 📈";
+  }
 
 const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
   const pieData = [
@@ -58,50 +63,25 @@ const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
     { name: "Failed",  value: failed  },
     { name: "Running", value: running },
   ];
-  const avgDuration = total > 0 ? builds.reduce((sum, b) => sum + (b.duration || 0), 0) / total: 0;
-
-  useEffect(() => {
-    setAiLoading(true);
-    setAiError(false);
-
-    fetch("http://localhost:5000/api/ai-insights")
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        setAiInsight(data.insight || "No insights available.");
-        setAiLoading(false);
-      })
-      .catch(err => {
-        console.error("AI fetch failed", err);
-        setAiError(true);
-        setAiLoading(false);
-      });
-  }, []);
+  const avgDuration =
+    metrics?.metrics?.avgDurationMs ??
+    (total > 0
+      ? builds.reduce((sum, b) => sum + (b.duration || 0), 0) / total
+      : 0);
 
   return (
     <div>
-      {/* 1. AI Insights Panel */}
-      <div className="bg-purple-100 p-6 rounded-xl mb-6">
-        <h3 className="font-semibold text-purple-700 mb-2">🧠 AI Insights</h3>
-        {aiLoading && <p>Analyzing builds...</p>}
-        {aiError   && <p className="text-red-500">Failed to load AI insights.</p>}
-        {!aiLoading && !aiError && (
-          <p className="text-gray-700 whitespace-pre-line">{aiInsight}</p>
-        )}
-      </div>
-
-      {/* 2. Summary Cards */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
+      {/* Summary + Health Cards */}
+      <div style={{ display: "flex", gap: "20px", marginBottom: "10px", flexWrap: "wrap" }}>
         <StatCard title="Total Builds" value={total} />
         <StatCard title="Success"      value={success} color="#10b981" />
         <StatCard title="Running"      value={running} color="#3b82f6" />
         <StatCard title="Failed"       value={failed}  color="#ef4444" />
+        <HealthCard health={metrics?.health} />
       </div>
-<p className="text-sm text-gray-400 mb-2">
-  Trend: {trend}
-</p>
+      <p className="text-sm text-gray-400 mb-4">
+        Trend: {trend}
+      </p>
 
       {/* 3. Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
@@ -243,5 +223,65 @@ const StatCard = ({ title, value, color }) => (
     </h2>
   </div>
 );
+
+const HealthCard = ({ health }) => {
+  const score = health?.score ?? 0;
+  const grade = health?.grade ?? "-";
+  const status = health?.status ?? "unknown";
+
+  let borderColor = "#e5e7eb";
+  let accent = "#6b7280";
+  if (status === "healthy") {
+    borderColor = "rgba(34,197,94,0.5)";
+    accent = "#16a34a";
+  } else if (status === "warning") {
+    borderColor = "rgba(245,158,11,0.6)";
+    accent = "#d97706";
+  } else if (status === "critical") {
+    borderColor = "rgba(239,68,68,0.7)";
+    accent = "#dc2626";
+  }
+
+  return (
+    <div style={{
+      flex: 1,
+      minWidth: 220,
+      background: "#020617",
+      padding: "18px 18px",
+      borderRadius: "10px",
+      boxShadow: "0 3px 10px rgba(15,23,42,0.7)",
+      border: `1px solid ${borderColor}`,
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      color: "#e5e7eb",
+    }}>
+      <div style={{
+        width: 54,
+        height: 54,
+        borderRadius: "999px",
+        border: `3px solid ${accent}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: 700,
+        fontSize: 18,
+      }}>
+        {score}
+      </div>
+      <div>
+        <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, color: "#9ca3af" }}>
+          Pipeline Health
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>{grade}</span>
+          <span style={{ fontSize: 12, color: accent, textTransform: "capitalize" }}>
+            {status}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default BuildsTable;
