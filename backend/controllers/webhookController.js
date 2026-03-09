@@ -1,15 +1,35 @@
 const Build = require("../models/Build");
 const Log = require("../models/Log");
+const Project = require("../models/Project");
 
 exports.handleWebhook = async (req, res) => {
   try {
     const payload = req.body;
+    const webhookToken =
+      req.params?.token ||
+      req.header("x-webhook-token") ||
+      req.query?.token ||
+      null;
+
+    if (!webhookToken) {
+      return res.status(400).json({
+        error:
+          "Webhook token required. Use POST /api/webhook/:token or provide x-webhook-token header.",
+      });
+    }
+
+    const project = await Project.findOne({ webhookToken });
+    if (!project) {
+      return res.status(404).json({ error: "Invalid webhook token" });
+    }
 
     const repoName = payload.repository.name;
     const branch = payload.ref.split("/").pop();
     const commit = payload.head_commit;
 
     const newBuild = await Build.create({
+      user: project.user,
+      project: project._id,
       repositoryName: repoName,
       branch: branch,
       commitId: commit.id,

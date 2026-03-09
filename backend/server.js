@@ -16,6 +16,8 @@ const logRoutes = require("./routes/log");
 app.use("/api/logs", logRoutes);
 const buildRoutes = require("./routes/build");
 app.use("/api/builds", buildRoutes);
+const metricsRoutes = require("./routes/metrics");
+app.use("/api/metrics", metricsRoutes);
 
 
 app.use('/api/projects', require('./routes/project'));

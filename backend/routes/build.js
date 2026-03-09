@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Build = require("../models/Build");
+const authMiddleware = require("../middleware/authMiddleWare");
 
 // GET all builds
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const { status, repo } = req.query;
 
-    const filter = {};
+    const filter = { user: req.user.id };
 
     if (status) filter.status = status;
     if (repo) filter.repositoryName = repo;

@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
 
 const buildSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true,
+  },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Project",
+    index: true,
+  },
   repositoryName: {
     type: String,
     required: true
