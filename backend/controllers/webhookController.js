@@ -1,6 +1,7 @@
 const Build = require("../models/Build");
 const Log = require("../models/Log");
 const Project = require("../models/Project");
+const Pipeline = require("../models/Pipeline");
 
 exports.handleWebhook = async (req, res) => {
   try {
@@ -36,6 +37,14 @@ exports.handleWebhook = async (req, res) => {
       message: commit.message,
       author: commit.author.name,
       status: "pending"
+    });
+
+    // Also create a pipeline record
+    await Pipeline.create({
+      project: project._id,
+      branch: branch,
+      status: "running",
+      triggeredBy: commit.author.name || "webhook"
     });
 
     // Respond immediately
@@ -75,6 +84,13 @@ async function simulateBuildPipeline(buildId) {
       }
       await build.save();
 
+      // Update pipeline status too
+      await Pipeline.updateOne(
+        { project: build.project, branch: build.branch },
+        { status: step.status },
+        { sort: { createdAt: -1 } }
+      );
+
       // Add logs
       for (const logMessage of step.logs) {
         await Log.create({
@@ -89,6 +105,16 @@ async function simulateBuildPipeline(buildId) {
       status: "failed",
       finishedAt: new Date()
     });
+
+    const build = await Build.findById(buildId);
+    if (build) {
+      await Pipeline.updateOne(
+        { project: build.project, branch: build.branch },
+        { status: "failed" },
+        { sort: { createdAt: -1 } }
+      );
+    }
+
     await Log.create({
       buildId: buildId,
       message: `Build failed: ${error.message}`

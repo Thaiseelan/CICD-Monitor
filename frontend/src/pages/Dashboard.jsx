@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import BuildsTable from "../components/BuildTable";
+import MetricsDisplay from "../components/MetricsDisplay";
 import api from "../api/api";
 import SidebarLayout from "../components/SidebarLayout";
 
@@ -34,7 +34,7 @@ export default function Dashboard() {
           Live CI/CD health, trends, and AI-driven insights for your projects.
         </p>
       </header>
-      <BuildsTable builds={builds} metrics={metrics} />
+      <MetricsDisplay builds={builds} metrics={metrics} />
     </SidebarLayout>
   );
 }

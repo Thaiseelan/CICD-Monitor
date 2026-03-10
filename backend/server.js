@@ -7,7 +7,7 @@ app.use(cors());
 const mongoose = require("mongoose");
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
-
+console.log("Mongo URI loaded:", process.env.MONGO_URI ? "YES" : "NO");
 const authMiddleware = require('./middleware/authMiddleWare');
 
 const webhookRoutes = require("./routes/webhook");

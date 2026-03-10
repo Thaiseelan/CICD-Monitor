@@ -50,6 +50,12 @@ export default function Navbar() {
           Builds
         </Link>
         <Link
+          to="/logs"
+          style={{ fontSize: 14, color: "#e5e7eb", textDecoration: "none" }}
+        >
+          Logs
+        </Link>
+        <Link
           to="/projects"
           style={{ fontSize: 14, color: "#e5e7eb", textDecoration: "none" }}
         >

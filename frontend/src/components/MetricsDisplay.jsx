@@ -1,4 +1,3 @@
-import StatusBadge from "../components/StatusBadge";
 import {
   LineChart,
   Line,
@@ -12,17 +11,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { Link } from "react-router-dom";
 
-const thStyle = {
-  padding: "12px 16px",
-  fontWeight: "600",
-  color: "#374151",
-  fontSize: "14px",
-};
-
-
-const BuildsTable = ({ builds, metrics }) => {
+const MetricsDisplay = ({ builds, metrics }) => {
   const total   = metrics?.summary?.total   ?? builds.length;
   const success = metrics?.summary?.success ?? builds.filter(b => b.status === "success").length;
   const running = metrics?.summary?.running ?? builds.filter(b => b.status === "running").length;
@@ -41,6 +31,7 @@ const BuildsTable = ({ builds, metrics }) => {
     }),
     duration: b.duration || 0,
   }));
+
   let trend = "Not enough data";
   if (metrics?.trends) {
     const { durationTrend, durationChangePct } = metrics.trends;
@@ -58,12 +49,13 @@ const BuildsTable = ({ builds, metrics }) => {
         : "Degrading 📈";
   }
 
-const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
+  const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
   const pieData = [
     { name: "Success", value: success },
     { name: "Failed",  value: failed  },
     { name: "Running", value: running },
   ];
+
   const avgDuration =
     metrics?.metrics?.avgDurationMs ??
     (total > 0
@@ -80,24 +72,23 @@ const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
         <StatCard title="Failed"       value={failed}  color="#ef4444" />
         <HealthCard health={metrics?.health} />
       </div>
-      <p className="text-sm text-gray-400 mb-4">
+      <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>
         Trend: {trend}
       </p>
 
-      {/* 3. Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+      {/* Charts */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 30 }}>
         {/* Line Chart */}
-        <div className="bg-gray-900 p-6 rounded-2xl shadow-xl border border-gray-800">
-          <h3 className="text-lg font-semibold text-gray-200 mb-4">
+        <div style={{ background: "#1f2937", padding: 20, borderRadius: 12, boxShadow: "0 3px 12px rgba(0,0,0,0.3)", border: "1px solid #374151" }}>
+          <h3 style={{ margin: "0 0 16px 0", fontSize: 16, fontWeight: 600, color: "#e5e7eb" }}>
             📈 Build Duration Trend
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              {/* Actual duration data line */}
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="name" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" />
+              <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151", borderRadius: 8 }} />
               <Line
                 type="monotone"
                 dataKey="duration"
@@ -107,7 +98,6 @@ const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
                 isAnimationActive={true}
                 animationDuration={800}
               />
-              {/* Average duration line */}
               <Line
                 type="monotone"
                 dataKey={() => avgDuration}
@@ -123,12 +113,12 @@ const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
         </div>
 
         {/* Pie Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+        <div style={{ background: "#ffffff", padding: 20, borderRadius: 12, boxShadow: "0 2px 10px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb" }}>
+          <h3 style={{ margin: "0 0 16px 0", fontSize: 16, fontWeight: 600, color: "#111827" }}>
             🥧 Build Status Distribution
           </h3>
           {total === 0 ? (
-            <p className="text-gray-400 text-sm mt-4">No build data available</p>
+            <p style={{ color: "#9ca3af", fontSize: 13, marginTop: 16 }}>No build data available</p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -148,49 +138,6 @@ const COLORS = ["#10b981", "#ef4444", "#3b82f6"];
             </ResponsiveContainer>
           )}
         </div>
-      </div>
-
-      {/* 4. Builds Table */}
-      <div style={{
-        background: "#ffffff",
-        padding: "20px",
-        borderRadius: "10px",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-        border: "1px solid #e5e7eb",
-      }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #e5e7eb" }}>
-              <th style={thStyle}>Repository</th>
-              <th style={thStyle}>Branch</th>
-              <th style={thStyle}>Status</th>
-              <th style={thStyle}>Duration (ms)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {builds.map((b) => (
-              <tr
-                key={b._id}
-                style={{ borderBottom: "1px solid #f3f4f6", transition: "background 0.2s", cursor: "pointer" }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "#f9fafb"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <td style={{ padding: "14px 16px", fontWeight: "500", color: "#111827" }}>
-                  <Link to={`/builds/${b._id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                    {b.repositoryName}
-                  </Link>
-                </td>
-                <td style={{ padding: "14px 16px", color: "#6b7280" }}>{b.branch}</td>
-                <td style={{ padding: "14px 16px" }}>
-                  <StatusBadge status={b.status} />
-                </td>
-                <td style={{ padding: "14px 16px", color: "#6b7280" }}>
-                  {b.duration || "-"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
@@ -248,43 +195,41 @@ const HealthCard = ({ health }) => {
   return (
     <div style={{
       flex: 1,
-      minWidth: 220,
-      background: "#020617",
-      padding: "18px 18px",
+      background: "#ffffff",
+      padding: "20px",
       borderRadius: "10px",
-      boxShadow: "0 3px 10px rgba(15,23,42,0.7)",
-      border: `1px solid ${borderColor}`,
-      display: "flex",
-      alignItems: "center",
-      gap: 14,
-      color: "#e5e7eb",
+      textAlign: "center",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+      border: `2px solid ${borderColor}`,
     }}>
-      <div style={{
-        width: 54,
-        height: 54,
-        borderRadius: "999px",
-        border: `3px solid ${accent}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 700,
-        fontSize: 18,
+      <h4 style={{
+        margin: 0,
+        fontSize: "13px",
+        color: "#6b7280",
+        fontWeight: "500",
+        textTransform: "uppercase",
+        letterSpacing: "0.5px",
       }}>
-        {score}
-      </div>
-      <div>
-        <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5, color: "#9ca3af" }}>
-          Pipeline Health
-        </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{ fontWeight: 600, fontSize: 14 }}>{grade}</span>
-          <span style={{ fontSize: 12, color: accent, textTransform: "capitalize" }}>
-            {status}
-          </span>
-        </div>
-      </div>
+        System Health
+      </h4>
+      <h2 style={{
+        margin: "10px 0 4px 0",
+        fontSize: "28px",
+        fontWeight: "700",
+        color: accent,
+      }}>
+        {grade}
+      </h2>
+      <p style={{
+        margin: 0,
+        fontSize: "12px",
+        color: accent,
+        fontWeight: "500",
+      }}>
+        Score: {(score * 100).toFixed(1)}%
+      </p>
     </div>
   );
 };
 
-export default BuildsTable;
+export default MetricsDisplay;

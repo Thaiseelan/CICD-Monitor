@@ -34,4 +34,20 @@ router.post('/:projectId', authMiddleware, async (req, res) => {
   }
 });
 
+// GET all pipelines for user
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const projects = await Project.find({ user: req.user.id }).select('_id');
+    const projectIds = projects.map(p => p._id);
+
+    const pipelines = await Pipeline.find({ project: { $in: projectIds } })
+      .populate('project', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json(pipelines);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

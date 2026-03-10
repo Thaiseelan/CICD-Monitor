@@ -4,8 +4,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProjectsPage from "./pages/ProjectsPage";
 import BuildsPage from "./pages/BuildsPage";
+import LogsPage from "./pages/LogsPage";
 import PipelinesPage from "./pages/PipelinesPage";
 import AiInsightsPage from "./pages/AiInsightsPage";
+import BuildDetails from "./pages/BuildDetails";
+import SettingsPage from "./pages/SettingsPage";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -35,6 +38,22 @@ function App() {
           }
         />
         <Route
+          path="/logs"
+          element={
+            <PrivateRoute>
+              <LogsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/builds/:id"
+          element={
+            <PrivateRoute>
+              <BuildDetails />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/projects"
           element={
             <PrivateRoute>
@@ -47,6 +66,14 @@ function App() {
           element={
             <PrivateRoute>
               <PipelinesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <SettingsPage />
             </PrivateRoute>
           }
         />
