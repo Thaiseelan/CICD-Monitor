@@ -59,25 +59,26 @@ export default function AiInsightsPage() {
     fetchBuilds();
   }, []);
 
-  useEffect(() => {
+  // Function to generate insight on-demand
+  const generateInsight = async () => {
     if (!selectedId) return;
+
     setLoadingInsight(true);
     setErrorInsight("");
     setInsightRaw("");
 
-    api
-      .get(`/ai-insights/${selectedId}`)
-      .then((res) => {
-        setInsightRaw(res.data?.insight || "");
-      })
-      .catch((err) => {
-        console.error("AI per-build insight failed", err);
-        setErrorInsight(
-          err.response?.data?.error || "Could not generate AI insight."
-        );
-      })
-      .finally(() => setLoadingInsight(false));
-  }, [selectedId]);
+    try {
+      const res = await api.get(`/ai-insights/${selectedId}`);
+      setInsightRaw(res.data?.insight || "");
+    } catch (err) {
+      console.error("AI per-build insight failed", err);
+      setErrorInsight(
+        err.response?.data?.error || "Could not generate AI insight."
+      );
+    } finally {
+      setLoadingInsight(false);
+    }
+  };
 
   const selectedBuild = builds.find((b) => b._id === selectedId) || null;
   const structured = parseInsight(insightRaw);
@@ -87,7 +88,7 @@ export default function AiInsightsPage() {
       <header style={{ marginBottom: 18 }}>
         <h2 style={{ margin: 0 }}>AI Insights</h2>
         <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#9ca3af" }}>
-          Click a build to see a short, structured explanation of what went
+          Click a build and then click "Generate AI Insight" to analyze what went
           wrong and how to fix it.
         </p>
       </header>
@@ -139,7 +140,12 @@ export default function AiInsightsPage() {
                 <button
                   key={b._id}
                   type="button"
-                  onClick={() => setSelectedId(b._id)}
+                  onClick={() => {
+                    setSelectedId(b._id);
+                    // Clear previous insight when selecting a new build
+                    setInsightRaw("");
+                    setErrorInsight("");
+                  }}
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -208,6 +214,29 @@ export default function AiInsightsPage() {
             </p>
           )}
 
+          {selectedBuild && !insightRaw && !loadingInsight && !errorInsight && (
+            <button
+              onClick={generateInsight}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                marginBottom: "10px",
+                background: "#3b82f6",
+                color: "#fff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: "500",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "#2563eb"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "#3b82f6"}
+            >
+              Generate AI Insight
+            </button>
+          )}
+
           {loadingInsight && (
             <p style={{ fontSize: 13, color: "#9ca3af" }}>
               Analyzing build… this usually takes a second.
@@ -240,7 +269,7 @@ export default function AiInsightsPage() {
           )}
           {!loadingInsight && !errorInsight && !insightRaw && (
             <p style={{ fontSize: 13, color: "#6b7280" }}>
-              Select a build on the left to generate a focused AI explanation.
+              Select a build on the left and click "Generate AI Insight" to analyze it.
             </p>
           )}
         </div>

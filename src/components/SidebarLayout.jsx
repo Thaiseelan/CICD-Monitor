@@ -78,6 +78,18 @@ function Sidebar() {
         </NavLink>
 
         <NavLink
+          to="/logs"
+          style={({ isActive }) => ({
+            ...linkBase,
+            backgroundColor: isActive ? "rgba(239, 68, 68, 0.16)" : "transparent",
+            color: isActive ? "#e5e7eb" : linkBase.color,
+          })}
+        >
+          <span>📋</span>
+          <span>Logs</span>
+        </NavLink>
+
+        <NavLink
           to="/projects"
           style={({ isActive }) => ({
             ...linkBase,
@@ -99,6 +111,18 @@ function Sidebar() {
         >
           <span>🚀</span>
           <span>Pipelines</span>
+        </NavLink>
+
+        <NavLink
+          to="/settings"
+          style={({ isActive }) => ({
+            ...linkBase,
+            backgroundColor: isActive ? "rgba(107, 114, 128, 0.18)" : "transparent",
+            color: isActive ? "#e5e7eb" : linkBase.color,
+          })}
+        >
+          <span>⚙️</span>
+          <span>Settings</span>
         </NavLink>
 
         <span style={{ fontSize: 11, textTransform: "uppercase", color: "#6b7280", marginTop: 10 }}>

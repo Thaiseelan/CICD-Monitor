@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import BuildsTable from "../components/BuildTable";
+import BuildsListTable from "../components/BuildsListTable";
 import SidebarLayout from "../components/SidebarLayout";
 
 export default function BuildsPage() {
@@ -27,7 +27,7 @@ export default function BuildsPage() {
           Detailed build history powering your dashboard metrics and AI analysis.
         </p>
       </header>
-      <BuildsTable builds={builds} />
+      <BuildsListTable builds={builds} />
     </SidebarLayout>
   );
 }

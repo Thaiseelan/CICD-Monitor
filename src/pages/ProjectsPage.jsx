@@ -56,6 +56,16 @@ export default function ProjectsPage() {
     }
   };
 
+  const handleTriggerBuild = async (projectId) => {
+    try {
+      await api.post("/builds", { projectId, branch: "main", message: "Manual trigger" });
+      alert("Build triggered!");
+    } catch (err) {
+      console.error("Trigger build failed", err);
+      setError("Failed to trigger build.");
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       await api.delete(`/projects/${id}`);
@@ -235,21 +245,38 @@ export default function ProjectsPage() {
                           {p.repoUrl}
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(p._id)}
-                        style={{
-                          padding: "6px 10px",
-                          borderRadius: 999,
-                          border: "1px solid rgba(239, 68, 68, 0.35)",
-                          background: "rgba(239, 68, 68, 0.08)",
-                          color: "#b91c1c",
-                          cursor: "pointer",
-                          fontSize: 13,
-                        }}
-                      >
-                        Delete
-                      </button>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          type="button"
+                          onClick={() => handleTriggerBuild(p._id)}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 999,
+                            border: "none",
+                            background: "#22c55e",
+                            color: "#fff",
+                            cursor: "pointer",
+                            fontSize: 13,
+                          }}
+                        >
+                          Trigger Build
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p._id)}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 999,
+                            border: "1px solid rgba(239, 68, 68, 0.35)",
+                            background: "rgba(239, 68, 68, 0.08)",
+                            color: "#b91c1c",
+                            cursor: "pointer",
+                            fontSize: 13,
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
 
                     {editingBaseUrl === p._id ? (
