@@ -3,7 +3,18 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 const cors = require("cors");
-app.use(cors());
+const allowedOrigins = [
+  "https://thaiseelan.github.io",
+  "http://localhost:5173",
+  "http://localhost:3000"
+];
+app.use(cors({ origin: (origin, callback) => {
+  if (!origin || allowedOrigins.includes(origin)) {
+    callback(null, true);
+  } else {
+    callback(new Error("Not allowed by CORS"));
+  }
+}}));
 const mongoose = require("mongoose");
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
