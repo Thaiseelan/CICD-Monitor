@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from "react";
 import api from "../api/api";
 import SidebarLayout from "../components/SidebarLayout";
 
@@ -8,51 +9,74 @@ function getWebhookUrl(token, baseUrl) {
 }
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const queryClient = useQueryClient();
+
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const res = await api.get("/projects");
+      return res.data;
+    },
+  });
+
+  const createProjectMutation = useMutation({
+    mutationFn: async (projectData) => {
+      const res = await api.post("/projects", projectData);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projectId) => {
+      await api.delete(`/projects/${projectId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ projectId, data }) => {
+      const res = await api.patch(`/projects/${projectId}`, data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  const sortedProjects = [...projects].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   const [name, setName] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
   const [webhookBaseUrl, setWebhookBaseUrl] = useState("http://localhost:5000");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [editingBaseUrl, setEditingBaseUrl] = useState(null);
   const [baseUrlValue, setBaseUrlValue] = useState("");
 
-  const sortedProjects = useMemo(() => {
-    return [...projects].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }, [projects]);
-
-  const fetchProjects = async () => {
-    const res = await api.get("/projects");
-    setProjects(res.data);
-  };
-
-  useEffect(() => {
-    fetchProjects().catch((err) => {
-      console.error("Failed to load projects", err);
-      setError("Failed to load projects.");
-    });
-  }, []);
-
   const handleCreate = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     try {
-      await api.post("/projects", { name, repoUrl, webhookBaseUrl: webhookBaseUrl || "http://localhost:5000" });
+      await createProjectMutation.mutateAsync({
+        name,
+        repoUrl,
+        webhookBaseUrl: webhookBaseUrl || "http://localhost:5000"
+      });
       setName("");
       setRepoUrl("");
       setWebhookBaseUrl("http://localhost:5000");
-      await fetchProjects();
     } catch (err) {
       setError(
         err.response?.data?.message ||
           err.response?.data?.error ||
           "Failed to create project."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -68,8 +92,7 @@ export default function ProjectsPage() {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/projects/${id}`);
-      await fetchProjects();
+      await deleteProjectMutation.mutateAsync(id);
     } catch (err) {
       console.error("Delete project failed", err);
       setError("Failed to delete project.");
@@ -82,8 +105,10 @@ export default function ProjectsPage() {
   };
   const saveBaseUrl = async (projectId) => {
     try {
-      await api.patch(`/projects/${projectId}`, { webhookBaseUrl: baseUrlValue || "http://localhost:5000" });
-      await fetchProjects();
+      await updateProjectMutation.mutateAsync({
+        projectId,
+        data: { webhookBaseUrl: baseUrlValue || "http://localhost:5000" }
+      });
       setEditingBaseUrl(null);
     } catch (err) {
       console.error("Update base URL failed", err);
@@ -169,7 +194,7 @@ export default function ProjectsPage() {
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={createProjectMutation.isPending}
                   style={{
                     padding: "10px 14px",
                     borderRadius: 999,
@@ -177,11 +202,11 @@ export default function ProjectsPage() {
                     background: "linear-gradient(to right, #a855f7, #6366f1, #0ea5e9)",
                     color: "#fff",
                     fontWeight: 600,
-                    cursor: loading ? "not-allowed" : "pointer",
-                    opacity: loading ? 0.7 : 1,
+                    cursor: createProjectMutation.isPending ? "not-allowed" : "pointer",
+                    opacity: createProjectMutation.isPending ? 0.7 : 1,
                   }}
                 >
-                  {loading ? "Creating..." : "Create"}
+                  {createProjectMutation.isPending ? "Creating..." : "Create"}
                 </button>
               </div>
               <div>

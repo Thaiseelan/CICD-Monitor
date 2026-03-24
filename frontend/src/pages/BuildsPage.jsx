@@ -1,23 +1,16 @@
-import { useEffect, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import api from "../api/api";
 import BuildsListTable from "../components/BuildsListTable";
 import SidebarLayout from "../components/SidebarLayout";
 
 export default function BuildsPage() {
-  const [builds, setBuilds] = useState([]);
-
-  useEffect(() => {
-    const fetchBuilds = async () => {
-      try {
-        const res = await api.get("/builds");
-        setBuilds(res.data);
-      } catch (err) {
-        console.error("Failed to load builds", err);
-      }
-    };
-
-    fetchBuilds();
-  }, []);
+  const { data: builds = [], isLoading } = useQuery({
+    queryKey: ['builds'],
+    queryFn: async () => {
+      const res = await api.get("/builds");
+      return res.data;
+    },
+  });
 
   return (
     <SidebarLayout>
@@ -27,7 +20,13 @@ export default function BuildsPage() {
           Detailed build history powering your dashboard metrics and AI analysis.
         </p>
       </header>
-      <BuildsListTable builds={builds} />
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af' }}>
+          Loading builds...
+        </div>
+      ) : (
+        <BuildsListTable builds={builds} />
+      )}
     </SidebarLayout>
   );
 }
