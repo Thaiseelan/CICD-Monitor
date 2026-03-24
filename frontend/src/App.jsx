@@ -1,14 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ProjectsPage from "./pages/ProjectsPage";
-import BuildsPage from "./pages/BuildsPage";
-import LogsPage from "./pages/LogsPage";
-import PipelinesPage from "./pages/PipelinesPage";
-import AiInsightsPage from "./pages/AiInsightsPage";
-import BuildDetails from "./pages/BuildDetails";
-import SettingsPage from "./pages/SettingsPage";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
