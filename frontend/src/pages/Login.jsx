@@ -17,7 +17,8 @@ export default function Login() {
       const res = await api.post("/auth/login", { email, password });
       const token = res.data?.token;
       if (token) {
-        localStorage.setItem("token", token);
+        sessionStorage.setItem("token", token);
+        localStorage.removeItem("token");
         navigate("/dashboard", { replace: true });
       } else {
         setError("Login failed: no token returned.");

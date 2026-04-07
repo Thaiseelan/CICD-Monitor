@@ -6,16 +6,18 @@ import ProjectsPage from "./pages/ProjectsPage";
 import BuildsPage from "./pages/BuildsPage";
 import LogsPage from "./pages/LogsPage";
 import PipelinesPage from "./pages/PipelinesPage";
-import AiInsightsPage from "./pages/AiInsightsPage";
+import AiInsightsPage from "./pages/AiInsightsPageV2";
 import BuildDetails from "./pages/BuildDetails";
 import SettingsPage from "./pages/SettingsPage";
 
 function PrivateRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
 function App() {
+  const token = sessionStorage.getItem("token");
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -93,7 +95,10 @@ function App() {
         }
       />
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route
+        path="/"
+        element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+      />
     </Routes>
   );
 }

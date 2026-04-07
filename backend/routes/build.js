@@ -3,10 +3,10 @@ const router = express.Router();
 const Build = require("../models/Build");
 const Log = require("../models/Log");
 const Project = require("../models/Project");
-const Pipeline = require("../models/Pipeline");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleWare");
 const { sendNotificationEmail } = require("../utils/notifications");
+const { syncPipelineStatus } = require("../utils/pipelineState");
 
 async function simulateBuildPipeline(buildId) {
   const steps = [
@@ -48,11 +48,15 @@ async function simulateBuildPipeline(buildId) {
       }
 
       // Update pipeline status too
-      await Pipeline.updateOne(
-        { project: build.project, branch: build.branch },
-        { status: step.status },
-        { sort: { createdAt: -1 } }
-      );
+      await syncPipelineStatus({
+        projectId: build.project,
+        branch: build.branch,
+        status: step.status,
+        triggeredBy: build.author || "manual",
+        lastBuildId: build._id,
+        lastCommitId: build.commitId,
+        lastRunAt: step.status === "success" ? build.finishedAt : build.startedAt || new Date(),
+      });
 
       // Add logs
       for (const logMessage of step.logs) {
@@ -71,11 +75,15 @@ async function simulateBuildPipeline(buildId) {
 
     const build = await Build.findById(buildId);
     if (build) {
-      await Pipeline.updateOne(
-        { project: build.project, branch: build.branch },
-        { status: "failed" },
-        { sort: { createdAt: -1 } }
-      );
+      await syncPipelineStatus({
+        projectId: build.project,
+        branch: build.branch,
+        status: "failed",
+        triggeredBy: build.author || "manual",
+        lastBuildId: build._id,
+        lastCommitId: build.commitId,
+        lastRunAt: build.finishedAt || new Date(),
+      });
 
       // Send failure notification
       const project = await Project.findById(build.project);
@@ -147,12 +155,14 @@ router.post("/", authMiddleware, async (req, res) => {
       status: "pending"
     });
 
-    // Also create a pipeline record
-    await Pipeline.create({
-      project: projectId,
+    await syncPipelineStatus({
+      projectId,
       branch: branch || "main",
       status: "running",
-      triggeredBy: "manual"
+      triggeredBy: "manual",
+      lastBuildId: newBuild._id,
+      lastCommitId: newBuild.commitId,
+      lastRunAt: new Date(),
     });
 
     res.status(201).json(newBuild);

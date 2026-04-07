@@ -22,8 +22,12 @@ export default function PipelinesPage() {
 
   const isLoading = pipelinesLoading || projectsLoading;
 
-  const getProjectName = (projectId) => {
-    const proj = projects.find(p => p._id === projectId);
+  const getProjectName = (projectValue) => {
+    if (projectValue && typeof projectValue === "object") {
+      return projectValue.name || "Unknown";
+    }
+
+    const proj = projects.find(p => p._id === projectValue);
     return proj ? proj.name : "Unknown";
   };
 
@@ -32,7 +36,7 @@ export default function PipelinesPage() {
       <div style={{ padding: 0 }}>
         <h2 style={{ marginBottom: "8px" }}>Pipelines</h2>
         <p style={{ color: "#9ca3af", fontSize: 14 }}>
-          Per-project pipeline health and recent runs.
+          Live status for each tracked project branch.
         </p>
 
         <div style={{ marginTop: 20, background: "#ffffff", padding: 20, borderRadius: 10, boxShadow: "0 2px 10px rgba(0,0,0,0.1)" }}>
@@ -49,7 +53,7 @@ export default function PipelinesPage() {
                     <th style={{ padding: "12px 16px", fontWeight: "600", color: "#374151", fontSize: "14px" }}>Branch</th>
                     <th style={{ padding: "12px 16px", fontWeight: "600", color: "#374151", fontSize: "14px" }}>Status</th>
                     <th style={{ padding: "12px 16px", fontWeight: "600", color: "#374151", fontSize: "14px" }}>Triggered By</th>
-                    <th style={{ padding: "12px 16px", fontWeight: "600", color: "#374151", fontSize: "14px" }}>Created</th>
+                    <th style={{ padding: "12px 16px", fontWeight: "600", color: "#374151", fontSize: "14px" }}>Last Activity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -64,7 +68,7 @@ export default function PipelinesPage() {
                       </td>
                       <td style={{ padding: "14px 16px", color: "#6b7280" }}>{p.triggeredBy}</td>
                       <td style={{ padding: "14px 16px", color: "#6b7280" }}>
-                        {new Date(p.createdAt).toLocaleString()}
+                        {new Date(p.lastRunAt || p.updatedAt || p.createdAt).toLocaleString()}
                       </td>
                     </tr>
                   ))}

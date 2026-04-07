@@ -3,6 +3,7 @@ const router = express.Router();
 const Pipeline = require('../models/Pipeline');
 const Project = require('../models/Project');
 const authMiddleware = require('../middleware/authMiddleWare');
+const { syncPipelineStatus } = require("../utils/pipelineState");
 
 // Create pipeline
 router.post('/:projectId', authMiddleware, async (req, res) => {
@@ -21,13 +22,15 @@ router.post('/:projectId', authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const pipeline = await Pipeline.create({
-      project: project._id,
+    const pipeline = await syncPipelineStatus({
+      projectId: project._id,
       branch,
-      triggeredBy: triggeredBy || "manual"
+      status: "running",
+      triggeredBy: triggeredBy || "manual",
+      lastRunAt: new Date(),
     });
 
-    res.status(201).json(pipeline);
+    res.status(200).json(pipeline);
 
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -42,9 +45,22 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const pipelines = await Pipeline.find({ project: { $in: projectIds } })
       .populate('project', 'name')
-      .sort({ createdAt: -1 });
+      .sort({ updatedAt: -1, createdAt: -1 });
 
-    res.json(pipelines);
+    const uniquePipelines = [];
+    const seen = new Set();
+
+    for (const pipeline of pipelines) {
+      const projectId = pipeline.project?._id?.toString?.() || pipeline.project?.toString?.();
+      const key = `${projectId}:${pipeline.branch}`;
+
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniquePipelines.push(pipeline);
+      }
+    }
+
+    res.json(uniquePipelines);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

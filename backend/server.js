@@ -1,20 +1,22 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-app.use(express.json());
 const cors = require("cors");
 const allowedOrigins = [
   "https://thaiseelan.github.io",
   "http://localhost:5173",
   "http://localhost:3000"
 ];
-app.use(cors({ origin: (origin, callback) => {
-  if (!origin || allowedOrigins.includes(origin)) {
-    callback(null, true);
-  } else {
-    callback(new Error("Not allowed by CORS"));
-  }
-}}));
+app.use(express.json());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+}));
 const mongoose = require("mongoose");
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
@@ -35,9 +37,6 @@ app.use('/api/projects', require('./routes/project'));
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/pipelines', require('./routes/pipeline'));
-
-app.use(cors());
-app.use(express.json());
 app.get('/api/protected', authMiddleware, (req, res) => {
   res.json({ message: "You accessed protected data", user: req.user });
 });

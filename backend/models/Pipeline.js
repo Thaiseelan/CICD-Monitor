@@ -18,6 +18,16 @@ const pipelineSchema = new mongoose.Schema({
   triggeredBy: {
     type: String,
     default: 'manual'
+  },
+  lastBuildId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Build'
+  },
+  lastCommitId: {
+    type: String
+  },
+  lastRunAt: {
+    type: Date
   }
 }, { timestamps: true });
 
