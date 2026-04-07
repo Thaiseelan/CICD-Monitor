@@ -10,14 +10,15 @@ const thStyle = {
 
 const BuildsListTable = ({ builds }) => {
   return (
-    <div style={{
+    <div className="table-card" style={{
       background: "#ffffff",
       padding: "20px",
       borderRadius: "10px",
       boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
       border: "1px solid #e5e7eb",
     }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="table-scroll">
+      <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ textAlign: "left", borderBottom: "2px solid #e5e7eb" }}>
             <th style={thStyle}>Repository</th>
@@ -54,6 +55,7 @@ const BuildsListTable = ({ builds }) => {
           ))}
         </tbody>
       </table>
+      </div>
       {builds.length === 0 && (
         <p style={{ textAlign: "center", color: "#9ca3af", padding: "20px" }}>
           No builds yet. Trigger a pipeline run to see builds here.

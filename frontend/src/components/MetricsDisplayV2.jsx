@@ -109,9 +109,9 @@ export default function MetricsDisplayV2({ builds, metrics, overview }) {
   ].filter((item) => item.value > 0);
 
   return (
-    <div style={{ display: "grid", gap: 28 }}>
+    <div className="dashboard-stack" style={{ display: "grid", gap: 28 }}>
       <section
-        className="fade-in"
+        className="dashboard-highlight fade-in"
         style={{
           position: "relative",
           overflow: "hidden",
@@ -127,6 +127,7 @@ export default function MetricsDisplayV2({ builds, metrics, overview }) {
         <div style={{ position: "absolute", bottom: -50, left: 100, width: 250, height: 250, background: "radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%)", filter: "blur(40px)", borderRadius: "50%", zIndex: 0 }} />
         
         <div
+          className="dashboard-highlight__grid"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1.6fr) minmax(320px, 0.9fr)",
@@ -202,6 +203,7 @@ export default function MetricsDisplayV2({ builds, metrics, overview }) {
       </section>
 
       <section
+        className="dashboard-stats"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -215,6 +217,7 @@ export default function MetricsDisplayV2({ builds, metrics, overview }) {
       </section>
 
       <section
+        className="dashboard-chart-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1.45fr) minmax(320px, 1fr)",
@@ -267,6 +270,7 @@ export default function MetricsDisplayV2({ builds, metrics, overview }) {
       </section>
 
       <section
+        className="dashboard-bottom-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",

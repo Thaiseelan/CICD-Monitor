@@ -22,6 +22,7 @@ function Sidebar() {
 
   return (
     <aside
+      className="app-sidebar__panel"
       style={{
         width: 220,
         padding: "18px 16px",
@@ -34,7 +35,7 @@ function Sidebar() {
         gap: 18,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div className="app-sidebar__brand" style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span
           style={{
             width: 30,
@@ -50,7 +51,7 @@ function Sidebar() {
         </div>
       </div>
 
-      <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <nav className="app-sidebar__nav" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ fontSize: 11, textTransform: "uppercase", color: "#6b7280" }}>
           Overview
         </span>
@@ -145,6 +146,7 @@ function Sidebar() {
       <div style={{ flex: 1 }} />
 
       <button
+        className="app-sidebar__logout"
         type="button"
         onClick={handleLogout}
         style={{
@@ -170,14 +172,18 @@ function Sidebar() {
 export default function SidebarLayout({ children }) {
   return (
     <div
+      className="app-shell"
       style={{
         minHeight: "100vh",
         display: "flex",
         background: "radial-gradient(circle at top, #020617 0, #020617 50%, #000 100%)",
       }}
     >
-      <Sidebar />
+      <div className="app-sidebar">
+        <Sidebar />
+      </div>
       <main
+        className="app-main"
         style={{
           flex: 1,
           padding: "20px 26px",

@@ -144,6 +144,7 @@ export default function ProjectsPage() {
         )}
 
         <div
+          className="projects-layout"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr)",
@@ -169,7 +170,7 @@ export default function ProjectsPage() {
                 gap: 10,
               }}
             >
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10 }}>
+              <div className="projects-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10 }}>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -257,6 +258,7 @@ export default function ProjectsPage() {
                     }}
                   >
                     <div
+                      className="project-card-header"
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -270,7 +272,7 @@ export default function ProjectsPage() {
                           {p.repoUrl}
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: 8 }}>
+                      <div className="project-card-actions" style={{ display: "flex", gap: 8 }}>
                         <button
                           type="button"
                           onClick={() => handleTriggerBuild(p._id)}
@@ -305,7 +307,7 @@ export default function ProjectsPage() {
                     </div>
 
                     {editingBaseUrl === p._id ? (
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <div className="project-inline-edit" style={{ display: "flex", gap: 8, alignItems: "center" }}>
                         <input
                           value={baseUrlValue}
                           onChange={(e) => setBaseUrlValue(e.target.value)}

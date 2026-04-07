@@ -58,6 +58,7 @@ export default function LogsPage() {
       </header>
 
       <div
+        className="logs-page-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 2fr",
@@ -67,6 +68,7 @@ export default function LogsPage() {
       >
         {/* Builds list */}
         <div
+          className="logs-builds-panel"
           style={{
             background: "#020617",
             borderRadius: 12,

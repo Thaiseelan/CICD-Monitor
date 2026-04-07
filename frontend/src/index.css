@@ -129,9 +129,127 @@ button {
   box-shadow: none;
 }
 
+.app-shell,
+.app-sidebar,
+.app-main,
+.dashboard-highlight__grid,
+.dashboard-chart-grid,
+.dashboard-bottom-grid,
+.logs-page-grid,
+.build-details-grid,
+.ai-insights-grid,
+.ai-mini-stats,
+.projects-form-grid,
+.projects-layout,
+.project-card-header,
+.project-card-actions,
+.project-inline-edit,
+.table-card,
+.logs-builds-panel {
+  min-width: 0;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 900px) {
   .page-hero {
     flex-direction: column;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .app-sidebar__panel {
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 14px 12px !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    gap: 14px !important;
+  }
+
+  .app-sidebar__nav {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .app-sidebar__nav > span {
+    grid-column: 1 / -1;
+  }
+
+  .app-sidebar__logout {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .app-main {
+    padding: 16px 12px 24px !important;
+  }
+
+  .dashboard-highlight {
+    padding: 20px !important;
+  }
+
+  .dashboard-highlight__grid,
+  .dashboard-chart-grid,
+  .dashboard-bottom-grid,
+  .logs-page-grid,
+  .ai-insights-grid,
+  .build-details-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .projects-form-grid,
+  .ai-mini-stats {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .project-card-header,
+  .project-card-actions,
+  .project-inline-edit {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .project-card-actions > button,
+  .project-inline-edit > button {
+    width: 100%;
+  }
+
+  .table-card {
+    padding: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-hero {
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+
+  .hero-chip {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-sidebar__nav {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .glass-panel {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .glass-subpanel {
+    padding: 12px 14px;
+    border-radius: 14px;
   }
 }
 

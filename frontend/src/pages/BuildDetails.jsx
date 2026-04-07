@@ -86,7 +86,7 @@ export default function BuildDetails() {
         </p>
       </header>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+      <div className="build-details-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
         <div style={cardStyle}>
           <h3 style={{ marginTop: 0, color: "#f8fafc" }}>Build Info</h3>
           <p style={valueStyle}><strong style={{ color: "#cbd5e1" }}>Status:</strong> <StatusBadge status={build.status} /></p>

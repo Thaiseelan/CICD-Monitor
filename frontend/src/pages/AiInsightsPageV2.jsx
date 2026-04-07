@@ -140,6 +140,7 @@ export default function AiInsightsPageV2() {
       </section>
 
       <div
+        className="ai-insights-grid"
         style={{
           display: "grid",
           gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 1fr)",
@@ -246,7 +247,7 @@ export default function AiInsightsPageV2() {
               {analysis && (
                 <div className="glass-subpanel">
                   <div className="eyebrow">Historical Context</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14, marginTop: 10 }}>
+                  <div className="ai-mini-stats" style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14, marginTop: 10 }}>
                     <MiniStat label="Previous Branch Failures" value={analysis.previousFailures ?? 0} />
                     <MiniStat label="Branch Baseline Duration" value={formatDuration(analysis.baselineDurationMs)} />
                   </div>
