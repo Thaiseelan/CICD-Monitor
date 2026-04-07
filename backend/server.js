@@ -2,15 +2,28 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const allowedOrigins = [
-  "https://thaiseelan.github.io",
+const explicitAllowedOrigins = [
+  process.env.FRONTEND_URL,
   "http://localhost:5173",
-  "http://localhost:3000"
-];
+  "http://localhost:3000",
+].filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (explicitAllowedOrigins.includes(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 app.use(express.json());
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
