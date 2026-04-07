@@ -1,11 +1,13 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
-function Sidebar() {
+function Sidebar({ onNavigate }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     localStorage.removeItem("token");
+    if (onNavigate) onNavigate();
     navigate("/login", { replace: true });
   };
 
@@ -170,6 +172,13 @@ function Sidebar() {
 }
 
 export default function SidebarLayout({ children }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <div
       className="app-shell"
@@ -179,8 +188,32 @@ export default function SidebarLayout({ children }) {
         background: "radial-gradient(circle at top, #020617 0, #020617 50%, #000 100%)",
       }}
     >
-      <div className="app-sidebar">
-        <Sidebar />
+      <header className="app-mobile-header">
+        <div className="app-mobile-header__brand">
+          <span className="app-mobile-header__mark" />
+          <div>
+            <div className="app-mobile-header__title">CI/CD Monitor</div>
+            <div className="app-mobile-header__subtitle">Intelligent health</div>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="app-mobile-header__button"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? "Close" : "Menu"}
+        </button>
+      </header>
+
+      <button
+        type="button"
+        aria-label="Close navigation"
+        className={`app-sidebar__overlay ${menuOpen ? "is-open" : ""}`}
+        onClick={() => setMenuOpen(false)}
+      />
+
+      <div className={`app-sidebar ${menuOpen ? "is-open" : ""}`}>
+        <Sidebar onNavigate={() => setMenuOpen(false)} />
       </div>
       <main
         className="app-main"
