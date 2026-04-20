@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const crypto = require("crypto");
+const { getDefaultWebhookBaseUrl } = require("../utils/publicUrl");
 
 const projectSchema = new mongoose.Schema({
   name: {
@@ -17,7 +18,7 @@ const projectSchema = new mongoose.Schema({
   },
   webhookBaseUrl: {
     type: String,
-    default: "http://localhost:5000",
+    default: getDefaultWebhookBaseUrl,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 const authMiddleware = require('../middleware/authMiddleWare');
+const { getDefaultWebhookBaseUrl } = require("../utils/publicUrl");
 
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const project = await Project.create({
       name: req.body.name,
       repoUrl: req.body.repoUrl,
-      webhookBaseUrl: req.body.webhookBaseUrl || "http://localhost:5000",
+      webhookBaseUrl: req.body.webhookBaseUrl || getDefaultWebhookBaseUrl(),
       user: req.user.id
     });
 
@@ -32,7 +33,9 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ message: "Project not found" });
     if (project.user.toString() !== req.user.id) return res.status(403).json({ message: "Not authorized" });
-    if (req.body.webhookBaseUrl !== undefined) project.webhookBaseUrl = req.body.webhookBaseUrl || "http://localhost:5000";
+    if (req.body.webhookBaseUrl !== undefined) {
+      project.webhookBaseUrl = req.body.webhookBaseUrl || getDefaultWebhookBaseUrl();
+    }
     await project.save();
     res.json(project);
   } catch (error) {

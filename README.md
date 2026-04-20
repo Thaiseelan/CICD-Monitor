@@ -37,6 +37,7 @@ A full-stack application for monitoring CI/CD pipelines with AI-powered insights
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
    PORT=5000
+   PUBLIC_BACKEND_URL=https://your-render-service.onrender.com
    ```
 4. Start the server: `npm run dev`
 
@@ -45,6 +46,10 @@ A full-stack application for monitoring CI/CD pipelines with AI-powered insights
 1. Navigate to `frontend/` directory.
 2. Install dependencies: `npm install`
 3. Start the dev server: `npm run dev`
+4. If your backend is deployed, point the frontend API to it:
+   ```
+   VITE_API_BASE_URL=https://your-render-service.onrender.com/api
+   ```
 
 ### Usage
 
@@ -53,6 +58,8 @@ A full-stack application for monitoring CI/CD pipelines with AI-powered insights
 3. Set up webhook in GitHub repo (push events).
 4. Push code, see builds appear.
 5. View dashboard, builds, insights.
+
+If your backend is deployed on Render or another public host, use that deployed URL as the webhook base. You do not need ngrok for GitHub webhooks in that setup.
 
 ## API Endpoints
 

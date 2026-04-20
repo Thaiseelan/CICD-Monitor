@@ -3,8 +3,29 @@ import { useState } from "react";
 import api from "../api/api";
 import SidebarLayout from "../components/SidebarLayout";
 
+function getDefaultWebhookBaseUrl() {
+  const explicitBaseUrl = import.meta.env.VITE_WEBHOOK_BASE_URL?.trim();
+  if (explicitBaseUrl) {
+    return explicitBaseUrl.replace(/\/$/, "");
+  }
+
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || api.defaults.baseURL;
+  if (typeof apiBaseUrl === "string" && apiBaseUrl.trim()) {
+    try {
+      const parsed = new URL(apiBaseUrl);
+      return `${parsed.protocol}//${parsed.host}`;
+    } catch {
+      // Ignore invalid URL values and keep the local fallback below.
+    }
+  }
+
+  return "http://localhost:5000";
+}
+
+const DEFAULT_WEBHOOK_BASE_URL = getDefaultWebhookBaseUrl();
+
 function getWebhookUrl(token, baseUrl) {
-  const base = (baseUrl || "http://localhost:5000").replace(/\/$/, "");
+  const base = (baseUrl || DEFAULT_WEBHOOK_BASE_URL).replace(/\/$/, "");
   return `${base}/api/webhook/${token}`;
 }
 
@@ -54,7 +75,7 @@ export default function ProjectsPage() {
 
   const [name, setName] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
-  const [webhookBaseUrl, setWebhookBaseUrl] = useState("http://localhost:5000");
+  const [webhookBaseUrl, setWebhookBaseUrl] = useState(DEFAULT_WEBHOOK_BASE_URL);
   const [error, setError] = useState("");
   const [editingBaseUrl, setEditingBaseUrl] = useState(null);
   const [baseUrlValue, setBaseUrlValue] = useState("");
@@ -66,11 +87,11 @@ export default function ProjectsPage() {
       await createProjectMutation.mutateAsync({
         name,
         repoUrl,
-        webhookBaseUrl: webhookBaseUrl || "http://localhost:5000"
+        webhookBaseUrl: webhookBaseUrl || DEFAULT_WEBHOOK_BASE_URL
       });
       setName("");
       setRepoUrl("");
-      setWebhookBaseUrl("http://localhost:5000");
+      setWebhookBaseUrl(DEFAULT_WEBHOOK_BASE_URL);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -101,13 +122,13 @@ export default function ProjectsPage() {
 
   const startEditBaseUrl = (p) => {
     setEditingBaseUrl(p._id);
-    setBaseUrlValue(p.webhookBaseUrl || "http://localhost:5000");
+    setBaseUrlValue(p.webhookBaseUrl || DEFAULT_WEBHOOK_BASE_URL);
   };
   const saveBaseUrl = async (projectId) => {
     try {
       await updateProjectMutation.mutateAsync({
         projectId,
-        data: { webhookBaseUrl: baseUrlValue || "http://localhost:5000" }
+        data: { webhookBaseUrl: baseUrlValue || DEFAULT_WEBHOOK_BASE_URL }
       });
       setEditingBaseUrl(null);
     } catch (err) {
@@ -212,12 +233,12 @@ export default function ProjectsPage() {
               </div>
               <div>
                 <label style={{ fontSize: 12, color: "#6b7280", display: "block", marginBottom: 4 }}>
-                  Webhook base URL (paste your ngrok URL here, e.g. https://xxx.ngrok-free.dev)
+                  Webhook base URL (defaults to your deployed backend, such as Render)
                 </label>
                 <input
                   value={webhookBaseUrl}
                   onChange={(e) => setWebhookBaseUrl(e.target.value)}
-                  placeholder="https://xxx.ngrok-free.dev or http://localhost:5000"
+                  placeholder="https://your-render-service.onrender.com"
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -311,7 +332,7 @@ export default function ProjectsPage() {
                         <input
                           value={baseUrlValue}
                           onChange={(e) => setBaseUrlValue(e.target.value)}
-                          placeholder="https://xxx.ngrok-free.dev"
+                          placeholder="https://your-render-service.onrender.com"
                           style={{
                             flex: 1,
                             padding: "8px 10px",
@@ -352,7 +373,7 @@ export default function ProjectsPage() {
                       </div>
                     ) : (
                       <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 4 }}>
-                        Base URL: {p.webhookBaseUrl || "http://localhost:5000"}{" "}
+                        Base URL: {p.webhookBaseUrl || DEFAULT_WEBHOOK_BASE_URL}{" "}
                         <button
                           type="button"
                           onClick={() => startEditBaseUrl(p)}
@@ -366,7 +387,7 @@ export default function ProjectsPage() {
                             background: "#f9fafb",
                           }}
                         >
-                          Change (e.g. ngrok)
+                          Change URL
                         </button>
                       </div>
                     )}
